@@ -82,7 +82,7 @@ public class AddJarPropertyPage extends PropertyPage implements IWorkbenchProper
 		TableLayout tblJarFilesLayout = new TableLayout();
 		tblJarFilesLayout.addColumnData(new ColumnPixelData(100));
 		tblJarFilesLayout.addColumnData(new ColumnPixelData(100));
-		
+
 		TableViewerColumn tblViewerJarFilesSubSystemColumn = new TableViewerColumn(tblJarFilesViewer, SWT.NONE);
 		TableColumn tblJarFileSubsystemCol = tblViewerJarFilesSubSystemColumn.getColumn();
 		tblJarFileSubsystemCol.setWidth(193);
@@ -99,7 +99,7 @@ public class AddJarPropertyPage extends PropertyPage implements IWorkbenchProper
 				return (file.getName());
 			}
 		});
-		
+
 		TableViewerColumn tblViewerJarFilesColumn = new TableViewerColumn(tblJarFilesViewer, SWT.NONE);
 		TableColumn tblJarFilesCol = tblViewerJarFilesColumn.getColumn();
 		tblJarFilesCol.setWidth(50);
@@ -112,27 +112,46 @@ public class AddJarPropertyPage extends PropertyPage implements IWorkbenchProper
 				}
 
 				File file = (File) element;
+				File[] jarFiles = file.listFiles(new FilenameFilter() {
+					@Override
+					public boolean accept(File dir, String name) {
+						return name.endsWith(".jar");
+					}
+				});
 
-				return (file.getPath());
+				StringBuilder buff = new StringBuilder();
+				int jarFilesLength = jarFiles.length;
+
+				for (int i = 0; i < jarFilesLength; i++) {
+					File jarFile = jarFiles[i];
+					
+					if ((i + 1) == jarFilesLength) {
+						buff.append(jarFile.getName());
+					} else {
+						buff.append(jarFile.getName() + ",");						
+					}
+				}
+
+				return (buff.toString());
 			}
 		});
-		
+
 		File[] subDirectories = getAllSubDirectories(directories[0]);
 		tblJarFilesViewer.setInput(subDirectories);
 		tblJarFilesViewer.setSelection(new StructuredSelection(directories[0]));
-		
+
 		branchesCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				File directory = directories[branchesCombo.getSelectionIndex()];
 				System.out.println("Retrieving sub directories");
 				File[] sub = getAllSubDirectories(directory);
-				System.out.println("Sub Directory Lenght : "+sub.length);
+				System.out.println("Sub Directory Lenght : " + sub.length);
 				System.out.println("End retrieving sub directories");
 				tblJarFilesViewer.setInput(sub);
 			}
 		});
-		
+
 		return parent;
 	}
 
