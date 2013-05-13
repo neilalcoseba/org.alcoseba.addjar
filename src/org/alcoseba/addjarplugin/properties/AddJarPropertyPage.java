@@ -6,10 +6,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
@@ -25,10 +36,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchPropertyPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 public class AddJarPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
+	private TableViewer tblJarFilesViewer;
+
 	public AddJarPropertyPage() {
 	}
 
@@ -72,7 +88,7 @@ public class AddJarPropertyPage extends PropertyPage implements IWorkbenchProper
 
 		final Composite tblJarFilesComposite = new Composite(parent, SWT.NONE);
 
-		final TableViewer tblJarFilesViewer = new TableViewer(tblJarFilesComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
+		this.tblJarFilesViewer = new TableViewer(tblJarFilesComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.CHECK);
 		tblJarFilesViewer.setContentProvider(ArrayContentProvider.getInstance());
 		Table tblJarFiles = tblJarFilesViewer.getTable();
 		tblJarFiles.setHeaderVisible(true);
@@ -124,11 +140,11 @@ public class AddJarPropertyPage extends PropertyPage implements IWorkbenchProper
 
 				for (int i = 0; i < jarFilesLength; i++) {
 					File jarFile = jarFiles[i];
-					
+
 					if ((i + 1) == jarFilesLength) {
 						buff.append(jarFile.getName());
 					} else {
-						buff.append(jarFile.getName() + ",");						
+						buff.append(jarFile.getName() + ",");
 					}
 				}
 
@@ -174,5 +190,82 @@ public class AddJarPropertyPage extends PropertyPage implements IWorkbenchProper
 		} while (subDirectories.size() != 0);
 
 		return (directories.toArray(new File[0]));
+	}
+
+	@Override
+	protected void performApply() {
+		System.out.println("APPLY");
+		super.performApply();
+		TableItem[] tableItems = this.tblJarFilesViewer.getTable().getItems();
+		List<File> jarFiles = new ArrayList<File>(0);
+
+		for (TableItem tableItem : tableItems) {
+			if (!tableItem.getChecked()) {
+				continue;
+			}
+
+			Object obj = tableItem.getData();
+
+			if (!(obj instanceof File)) {
+				continue;
+			}
+
+			File file = (File) obj;
+			File[] dirJarFiles = file.listFiles(new FilenameFilter() {
+				@Override
+				public boolean accept(File dir, String name) {
+					return name.endsWith(".jar");
+				}
+			});
+			
+			jarFiles.addAll(Arrays.asList(dirJarFiles));
+		}
+		
+		setClasspath(jarFiles.toArray(new File[0]));
+	}
+
+	@Override
+	public boolean performOk() {
+		return super.performOk();
+	}
+
+	public void setClasspath(File[] jarFiles) {
+		System.out.println("Classpath Jar : "+jarFiles);
+		IProject project = null;
+		ISelectionService selectionService = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
+		ISelection selection = selectionService.getSelection();
+
+		if (selection instanceof IStructuredSelection) {
+			Object element = ((IStructuredSelection) selection).getFirstElement();
+
+			if (element instanceof IResource) {
+				System.out.println("IResource");
+				project = ((IResource) element).getProject();
+				// TODO : PUT HERE IN ADDING JAR FILES ON A "RESOURCE PAGE"
+			} else if (element instanceof IPackageFragmentRoot) {
+				System.out.println("IPackageFragmentRoot");
+				IJavaProject jProject = ((IPackageFragmentRoot) element).getJavaProject();
+				project = jProject.getProject();
+			} else if (element instanceof IJavaElement) {
+				System.out.println("IJavaElement");
+				IJavaProject jProject = ((IJavaElement) element).getJavaProject();
+				List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+
+				for (File jarFile : jarFiles) {
+					entries.add(JavaCore.newLibraryEntry(new Path(jarFile.getAbsolutePath()), null, new Path("/")));
+				}
+
+				try {
+					IClasspathEntry[] classPathEntries = jProject.getRawClasspath();
+					entries.addAll(Arrays.asList(classPathEntries));
+
+					jProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]), null);
+				} catch (JavaModelException e) {
+					e.printStackTrace();
+				}
+
+				project = jProject.getProject();
+			}
+		}
 	}
 }
