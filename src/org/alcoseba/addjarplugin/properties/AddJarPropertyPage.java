@@ -54,7 +54,7 @@ public class AddJarPropertyPage extends PropertyPage implements IWorkbenchProper
 		branchesComposite.setLayout(new RowLayout(SWT.HORIZONTAL));
 
 		Label lblBranches = new Label(branchesComposite, SWT.NONE);
-		lblBranches.setText("Branches");
+		lblBranches.setText("Directory");
 
 		File downloadDir = new File(System.getProperty("user.home"), "Downloads");
 		final File[] directories = downloadDir.listFiles(new FilenameFilter() {
@@ -102,7 +102,7 @@ public class AddJarPropertyPage extends PropertyPage implements IWorkbenchProper
 		TableViewerColumn tblViewerJarFilesSubSystemColumn = new TableViewerColumn(tblJarFilesViewer, SWT.NONE);
 		TableColumn tblJarFileSubsystemCol = tblViewerJarFilesSubSystemColumn.getColumn();
 		tblJarFileSubsystemCol.setWidth(193);
-		tblJarFileSubsystemCol.setText("SubSystem");
+		tblJarFileSubsystemCol.setText("Sub-Directory");
 		tblViewerJarFilesSubSystemColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {

@@ -3,28 +3,7 @@
 <plugin>
 
    <extension
-         point="org.eclipse.ui.actionSets">
-      <actionSet
-            label="Sample Action Set"
-            visible="true"
-            id="org.alcoseba.addjarplugin.actionSet">
-         <menu
-               label="Sample &amp;Menu"
-               id="sampleMenu">
-            <separator
-                  name="sampleGroup">
-            </separator>
-         </menu>
-         <action
-               label="&amp;Sample Action"
-               icon="icons/sample.gif"
-               class="org.alcoseba.addjarplugin.actions.AddJarAction"
-               tooltip="Hello, Eclipse world"
-               menubarPath="sampleMenu/sampleGroup"
-               toolbarPath="sampleGroup"
-               id="org.alcoseba.addjarplugin.actions.AddJarAction">
-         </action>
-      </actionSet>
+         point="org.eclipse.ui.commands">
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
@@ -39,7 +18,7 @@
       </page>
    </extension>
    <extension point="org.eclipse.jdt.core.classpathVariableInitializer">
-      <classpathVariableInitializer variable="AL_CACHE" readOnly="false"
+      <classpathVariableInitializer variable="JAR_DIRECTORIES" readOnly="false"
           class="org.alcoseba.addjarplugin.classpath.AddJarClasspathVariableInitializer"/>
    </extension>
 </plugin>
