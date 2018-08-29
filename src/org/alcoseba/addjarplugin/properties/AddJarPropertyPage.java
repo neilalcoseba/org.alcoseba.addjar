@@ -56,7 +56,7 @@ public class AddJarPropertyPage extends PropertyPage implements IWorkbenchProper
 		Label lblBranches = new Label(branchesComposite, SWT.NONE);
 		lblBranches.setText("Branches");
 
-		File downloadDir = new File("/home/neil/Downloads");
+		File downloadDir = new File(System.getProperty("user.home"), "Downloads");
 		final File[] directories = downloadDir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
