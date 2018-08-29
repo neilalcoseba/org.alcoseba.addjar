@@ -18,7 +18,7 @@ public class AddJarClasspathVariableInitializer extends ClasspathVariableInitial
 		System.out.println("AddJarClasspathVariableInitializer : " + variable);
 
 		try {
-			File localRepositoryDir = new File("/home/neil/Downloads");
+			File localRepositoryDir = new File(System.getProperty("user.home"), "Downloads");
 			IPath newPath = new Path(localRepositoryDir.getAbsolutePath());
 			JavaCore.setClasspathVariable(AL_CACHE, newPath, new NullProgressMonitor());
 		} catch (CoreException ex) {
