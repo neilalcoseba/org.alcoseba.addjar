@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 public class AddJarClasspathVariableInitializer extends ClasspathVariableInitializer {
 
-	public static final String AL_CACHE = "AL_CACHE";
+	public static final String JAR_DIRECTORIES = "JAR_DIRECTORIES";
 
 	@Override
 	public void initialize(String variable) {
@@ -20,7 +20,7 @@ public class AddJarClasspathVariableInitializer extends ClasspathVariableInitial
 		try {
 			File localRepositoryDir = new File(System.getProperty("user.home"), "Downloads");
 			IPath newPath = new Path(localRepositoryDir.getAbsolutePath());
-			JavaCore.setClasspathVariable(AL_CACHE, newPath, new NullProgressMonitor());
+			JavaCore.setClasspathVariable(JAR_DIRECTORIES, newPath, new NullProgressMonitor());
 		} catch (CoreException ex) {
 			ex.printStackTrace();
 		}
